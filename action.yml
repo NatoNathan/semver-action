@@ -41,6 +41,9 @@ inputs:
     description: A prefix that will be ignored when parsing tags. Useful for monorepos. The prefix will be added back to the output values.
     required: false
     default: ''
+  squashMergeCommitMessage:
+    description: if set to a valid commit message, will calculate semver based on this commit message instead of the list of commits. Useful for squash merges.
+    required: false
   additionalCommits:
     description: A list of additional commit messages to parse in order to calculate semver.
     required: false
