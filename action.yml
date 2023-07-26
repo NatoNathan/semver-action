@@ -51,6 +51,9 @@ inputs:
     description: Override the tag to use when comparing against the branch in order to fetch the list of commits.
     required: false
     default: ''
+  minimumChange:
+    description: The minimum change to bump the version, useful when determining the next version for a prerelease. (major, minor, patch)
+    required: false
 outputs:
   current:
     description: Current version number / latest tag.

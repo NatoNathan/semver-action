@@ -21,7 +21,7 @@ async function main() {
     .map((l) => l.trim())
     .filter((l) => l !== "");
   const fromTag = core.getInput("fromTag");
-
+  const minimumChange = core.getInput("minimumChange");
   core.debug(
     `Parsed additional commits as ${JSON.stringify(additionalCommits)}`
   );
@@ -285,7 +285,7 @@ async function main() {
       }
     }
   }
-  if (preReleaseStage != "none") bump = `pre${bump}`;
+
   core.setOutput("versionType", bump);
   core.info(
     `\n>>> Will bump version ${prefix}${
@@ -294,11 +294,38 @@ async function main() {
   );
 
   // BUMP VERSION
-
-  const next =
-    preReleaseStage == "none"
+  const bumpValues = {
+    major: 0,
+    minor: 1,
+    patch: 2,
+    none: 3,
+  };
+  const bumpVersion = (bump, preReleaseStage) =>
+    preReleaseStage === "none"
       ? semver.inc(latestTag.name, bump)
-      : semver.inc(latestTag.name, bump, preReleaseStage);
+      : semver.inc(latestTag.name, `pre${bump}`, preReleaseStage);
+  /**
+   * Get the next version based on the bump type, pre-release stage and minimum change
+   *
+   * If the minimum change is not met, the version will not be bumped and preReleaseStage is not none a pre-release of the same version will be created
+   * If minimumChange is met, the version will be bumped, and the preReleaseStage will be followed as normal
+   *
+   * @param {'major'| 'minor'| 'patch'} bump
+   * @param {'alpha'| 'beta'| 'rc'| 'none'} preReleaseStage
+   * @param {'major'| 'minor'| 'patch'| 'none'} minimumChange
+   */
+  const getNextVersion = (bump, preReleaseStage, minimumChange) => {
+    // if bump is less then minimum change, then it has higher priority
+    if (bumpValues[bump] < bumpValues[minimumChange])
+      return bumpVersion(bump, preReleaseStage);
+    // if bump is greater then minimum change, then no version bump is required
+    if (bumpValues[bump] >= bumpValues[minimumChange])
+      return preReleaseStage === "none"
+        ? latestTag.name
+        : semver.inc(latestTag.name, "prerelease", preReleaseStage);
+  };
+
+  const next = getNextVersion(bump, preReleaseStage, minimumChange);
 
   core.info(`Current version is ${prefix}${latestTag.name}`);
   core.info(`Next version is ${prefix}v${next}`);
