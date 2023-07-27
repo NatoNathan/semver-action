@@ -31020,6 +31020,46 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__nccwpck_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__nccwpck_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/node module decorator */
 /******/ 	(() => {
 /******/ 		__nccwpck_require__.nmd = (module) => {
@@ -31035,74 +31075,108 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
-const github = __nccwpck_require__(5438);
-const core = __nccwpck_require__(2186);
-const _ = __nccwpck_require__(250);
-const cc = __nccwpck_require__(4523);
-const semver = __nccwpck_require__(1383);
+"use strict";
+// ESM COMPAT FLAG
+__nccwpck_require__.r(__webpack_exports__);
 
-async function main() {
-  const token = core.getInput("token");
-  const branch = core.getInput("branch");
-  const gh = github.getOctokit(token);
-  const owner = github.context.repo.owner;
-  const repo = github.context.repo.repo;
-  const skipInvalidTags = core.getBooleanInput("skipInvalidTags");
-  const noVersionBumpBehavior = core.getInput("noVersionBumpBehavior");
-  const squashMergeCommitMessage = core.getInput("squashMergeCommitMessage");
-  const preReleaseStage = core.getInput("preReleaseStage") || "none";
-  const prefix = core.getInput("prefix") || "";
-  const additionalCommits = core
-    .getInput("additionalCommits")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter((l) => l !== "");
-  const fromTag = core.getInput("fromTag");
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __nccwpck_require__(5438);
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(2186);
+// EXTERNAL MODULE: ./node_modules/lodash/lodash.js
+var lodash = __nccwpck_require__(250);
+var lodash_default = /*#__PURE__*/__nccwpck_require__.n(lodash);
+// EXTERNAL MODULE: ./node_modules/semver/index.js
+var semver = __nccwpck_require__(1383);
+var semver_default = /*#__PURE__*/__nccwpck_require__.n(semver);
+// EXTERNAL MODULE: ./node_modules/@conventional-commits/parser/index.js
+var parser = __nccwpck_require__(4523);
+;// CONCATENATED MODULE: ./src/utils.ts
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 
-  core.debug(
-    `Parsed additional commits as ${JSON.stringify(additionalCommits)}`
-  );
 
-  const bumpTypes = {
-    major: core
-      .getInput("majorList")
-      .split(",")
-      .map((p) => p.trim())
-      .filter((p) => p),
-    minor: core
-      .getInput("minorList")
-      .split(",")
-      .map((p) => p.trim())
-      .filter((p) => p),
-    patch: core
-      .getInput("patchList")
-      .split(",")
-      .map((p) => p.trim())
-      .filter((p) => p),
-    patchAll:
-      core.getInput("patchAll") === true ||
-      core.getInput("patchAll") === "true",
-  };
 
-  function outputVersion(version) {
-    core.exportVariable("next", `${prefix}v${version}`);
-    core.exportVariable("nextStrict", `${prefix}${version}`);
 
-    core.setOutput("next", `${prefix}v${version}`);
-    core.setOutput("nextStrict", `${prefix}${version}`);
-    core.setOutput("nextMajor", `${prefix}v${semver.major(version)}`);
-    core.setOutput("nextMajorStrict", `${prefix}${semver.major(version)}`);
-  }
-
-  let latestTag = null;
-
-  if (!fromTag) {
-    // GET LATEST + PREVIOUS TAGS
-
-    const tagsRaw = await gh.graphql(
-      `
+const bumpValues = {
+    major: 0,
+    minor: 1,
+    patch: 2,
+    none: 3,
+};
+/**
+ * Bump the version based on the bump type and pre-release stage
+ * @param version The current version
+ * @param bump The bump type
+ * @param preReleaseStage The pre-release stage
+ * @returns The bumped version
+ */
+const bumpVersion = (version, bump, preReleaseStage) => preReleaseStage === "none"
+    ? semver_default().inc(version, bump)
+    : semver_default().inc(version, `pre${bump}`, preReleaseStage);
+/**
+ * Get the next version based on the bump type, pre-release stage and minimum change
+ *
+ * If the minimum change is not met, the version will not be bumped and preReleaseStage is not none a pre-release of the same version will be created
+ * If minimumChange is met, the version will be bumped, and the preReleaseStage will be followed as normal
+ *
+ * @param version The current version
+ * @param bump The bump type
+ * @param preReleaseStage The pre-release stage
+ * @param minimumChange The minimum change
+ */
+const getNextVersion = (version, bump, preReleaseStage, minimumChange) => {
+    // if bump is less then minimum change, then it has higher priority
+    if (bumpValues[bump] < bumpValues[minimumChange])
+        return bumpVersion(version, bump, preReleaseStage);
+    // if bump is greater then minimum change, then no version bump is required
+    return preReleaseStage === "none"
+        ? version
+        : semver_default().inc(version, "prerelease", preReleaseStage);
+};
+const parseCommit = (bumpTypes, commitMessage, commitSha = "unknown") => {
+    const ast = (0,parser.parser)(commitMessage);
+    (0,core.debug)(`Parsed commit ${commitSha} as ${JSON.stringify(ast)}`);
+    const cAst = (0,parser.toConventionalChangelogFormat)(ast);
+    (0,core.debug)(`Converted commit ${commitSha} to ${JSON.stringify(cAst)}`);
+    if (cAst.notes.some((note) => note.title === "BREAKING CHANGE")) {
+        (0,core.info)(`[MAJOR] Commit ${commitSha} has a BREAKING CHANGE mention, causing a major version bump.`);
+        return "major";
+    }
+    if (bumpTypes.major.includes(cAst.type)) {
+        (0,core.info)(`[MAJOR] Commit ${commitSha} of type ${cAst.type} will cause a major version bump.`);
+        return "major";
+    }
+    if (bumpTypes.minor.includes(cAst.type)) {
+        (0,core.info)(`[MINOR] Commit ${commitSha} of type ${cAst.type} will cause a minor version bump.`);
+        return "minor";
+    }
+    if (bumpTypes.patchAll || bumpTypes.patch.includes(cAst.type)) {
+        (0,core.info)(`[PATCH] Commit ${commitSha} of type ${cAst.type} will cause a patch version bump.`);
+        return "patch";
+    }
+    (0,core.info)(`[SKIP] Commit ${commitSha} of type ${cAst.type} will not cause any version bump.`);
+    return null;
+};
+const outputVersion = (version, prefix = '') => {
+    (0,core.exportVariable)("next", `${prefix}v${version}`);
+    (0,core.exportVariable)("nextStrict", `${prefix}${version}`);
+    (0,core.setOutput)("next", `${prefix}v${version}`);
+    (0,core.setOutput)("nextStrict", `${prefix}${version}`);
+    (0,core.setOutput)("nextMajor", `${prefix}v${semver_default().major(version)}`);
+    (0,core.setOutput)("nextMajorStrict", `${prefix}${semver_default().major(version)}`);
+};
+const getLatestTag = (gh, owner, repo, skipInvalidTags, prefix) => __awaiter(void 0, void 0, void 0, function* () {
+    const tagsRaw = yield gh.graphql(`
       query lastTags ($owner: String!, $repo: String!) {
         repository (owner: $owner, name: $repo) {
           refs(first: 10, refPrefix: "refs/tags/", orderBy: { field: TAG_COMMIT_DATE, direction: DESC }) {
@@ -31115,48 +31189,35 @@ async function main() {
           }
         }
       }
-    `,
-      {
+    `, {
         owner,
         repo,
-      }
-    );
-
-    const tagsList = _.get(tagsRaw, "repository.refs.nodes", []);
-    if (tagsList.length < 1) {
-      return core.setFailed(
-        "Couldn't find the latest tag. Make sure you have at least one tag created first!"
-      );
-    }
-
-    let idx = 0;
-    for (const tag of tagsList) {
-      if (prefix && tag.name.indexOf(prefix) === 0) {
-        tag.name = tag.name.replace(prefix, "");
-      }
-      if (semver.valid(tag.name)) {
-        latestTag = tag;
-        break;
-      } else if (idx === 0 && !skipInvalidTags) {
-        break;
-      }
-      idx++;
-    }
-
-    if (!latestTag) {
-      return core.setFailed(
-        skipInvalidTags
-          ? "None of the 10 latest tags are valid semver!"
-          : "Latest tag is invalid (does not conform to semver)!"
-      );
-    }
-
-    core.info(`Comparing against latest tag: ${prefix}${latestTag.name}`);
-  } else {
-    // GET SPECIFIC TAG
-
-    const tagRaw = await gh.graphql(
-      `
+    });
+    const tagsList = lodash_default().get(tagsRaw, "repository.refs.nodes", []);
+    if (tagsList.length < 1)
+        throw new Error("No tags found!");
+    // strip prefix from tags
+    const tags = tagsList
+        .map((tag) => {
+        if (prefix && tag.name.indexOf(prefix) === 0)
+            tag.name = tag.name.replace(prefix, "");
+        return tag;
+    })
+        .filter((tag) => semver_default().valid(tag.name));
+    // .reduce((acc: Tag | null, tag: Tag, index: number) => {
+    //   if (!skipInvalidTags && index === 0) return tag;
+    // }, null);
+    if (!tags)
+        throw new Error("No valid tags found!");
+    if (!skipInvalidTags)
+        return tags[0];
+    const tag = tags.find((tag) => semver_default().valid(tag.name));
+    if (!tag)
+        throw new Error("No valid tags found!");
+    return tag;
+});
+const getSpecificTag = (gh, owner, repo, tag, prefix) => __awaiter(void 0, void 0, void 0, function* () {
+    const tagRaw = yield gh.graphql(`
       query singleTag ($owner: String!, $repo: String!, $tag: String!) {
         repository (owner: $owner, name: $repo) {
           ref(qualifiedName: $tag) {
@@ -31167,184 +31228,169 @@ async function main() {
           }
         }
       }
-    `,
-      {
+    `, {
         owner,
         repo,
-        tag: `refs/tags/${prefix}${fromTag}`,
-      }
-    );
-
-    latestTag = _.get(tagRaw, "repository.ref");
-
-    if (!latestTag) {
-      return core.setFailed("Provided tag could not be found!");
-    }
-    if (prefix && latestTag.name.indexOf(prefix) === 0) {
-      latestTag.name = latestTag.name.replace(prefix, "");
-    }
-    if (!semver.valid(latestTag.name)) {
-      return core.setFailed(
-        "Provided tag is invalid! (does not conform to semver)"
-      );
-    }
-
-    core.info(`Comparing against provided tag: ${prefix}${latestTag.name}`);
-  }
-
-  // OUTPUT CURRENT VARS
-
-  core.exportVariable("current", `${prefix}${latestTag.name}`);
-  core.setOutput("current", `${prefix}${latestTag.name}`);
-
-  // GET COMMITS
-
-  let curPage = 0;
-  let totalCommits = 0;
-  let hasMoreCommits = false;
-  const commits = [];
-  do {
-    hasMoreCommits = false;
-    curPage++;
-    const commitsRaw = await gh.rest.repos.compareCommitsWithBasehead({
-      owner,
-      repo,
-      basehead: `${latestTag.name}...${branch}`,
-      page: curPage,
-      per_page: 100,
+        tag: `refs/tags/${prefix}${tag}`,
     });
-    totalCommits = _.get(commitsRaw, "data.total_commits", 0);
-    const rangeCommits = _.get(commitsRaw, "data.commits", []);
-    commits.push(...rangeCommits);
-    if ((curPage - 1) * 100 + rangeCommits.length < totalCommits) {
-      hasMoreCommits = true;
-    }
-  } while (hasMoreCommits);
+    const latestTag = lodash_default().get(tagRaw, "repository.ref");
+    if (!latestTag)
+        throw new Error("No tag found!");
+    if (prefix && latestTag.name.indexOf(prefix) === 0)
+        latestTag.name = latestTag.name.replace(prefix, "");
+    if (!semver_default().valid(latestTag.name))
+        throw new Error("No valid tag found!");
+    return latestTag;
+});
 
-  if (additionalCommits && additionalCommits.length > 0) {
-    commits.push(...additionalCommits);
-  }
+;// CONCATENATED MODULE: ./src/index.ts
+var src_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 
-  if (!commits || commits.length < 1) {
-    return core.setFailed(
-      "Couldn't find any commits between HEAD and latest tag."
-    );
-  }
 
-  // PARSE COMMITS
 
-  const parseCommit = (commitMessage, commitSha = "unknown") => {
-    const ast = cc.parser(commitMessage);
-    core.debug(`Parsed commit ${commitSha} as ${JSON.stringify(ast)}`);
-    const cAst = cc.toConventionalChangelogFormat(ast);
-    core.debug(`Converted commit ${commitSha} to ${JSON.stringify(cAst)}`);
 
-    if (bumpTypes.major.includes(cAst.type)) {
-      core.info(
-        `[MAJOR] Commit ${commitSha} of type ${cAst.type} will cause a major version bump.`
-      );
-      return "major";
-    }
-    if (bumpTypes.minor.includes(cAst.type)) {
-      core.info(
-        `[MINOR] Commit ${commitSha} of type ${cAst.type} will cause a minor version bump.`
-      );
-      return "minor";
-    }
-    if (bumpTypes.patchAll || bumpTypes.patch.includes(cAst.type)) {
-      core.info(
-        `[PATCH] Commit ${commitSha} of type ${cAst.type} will cause a patch version bump.`
-      );
-      return "patch";
-    }
-    core.info(
-      `[SKIP] Commit ${commitSha} of type ${cAst.type} will not cause any version bump.`
-    );
-    for (const note of cAst.notes) {
-      if (note.title === "BREAKING CHANGE") {
-        core.info(
-          `[MAJOR] Commit ${commitSha} has a BREAKING CHANGE mention, causing a major version bump.`
-        );
-        return "major";
-      }
-    }
 
-    return null;
-  };
-
-  core.info(`Found ${commits.length} commits between HEAD and latest tag.`);
-
-  const changes = !squashMergeCommitMessage
-    ? commits.map((commit) => {
-        const commitMessage = commit?.commit?.message ?? commit;
-        const commitSha = commit?.sha ?? "unknown";
+function main() {
+    return src_awaiter(this, void 0, void 0, function* () {
+        const token = core.getInput("token");
+        const branch = core.getInput("branch");
+        const gh = github.getOctokit(token);
+        const owner = github.context.repo.owner;
+        const repo = github.context.repo.repo;
+        const skipInvalidTags = core.getBooleanInput("skipInvalidTags");
+        const noVersionBumpBehavior = core.getInput("noVersionBumpBehavior");
+        const squashMergeCommitMessage = core.getInput("squashMergeCommitMessage");
+        const preReleaseStage = core.getInput("preReleaseStage") || "none";
+        const prefix = core.getInput("prefix") || "";
+        const additionalCommits = core.getInput("additionalCommits")
+            .split("\n")
+            .map((l) => l.trim())
+            .filter((l) => l !== "");
+        const fromTag = core.getInput("fromTag");
+        const minimumChange = core.getInput("minimumChange");
+        core.debug(`Parsed additional commits as ${JSON.stringify(additionalCommits)}`);
+        const bumpTypes = {
+            major: core.getInput("majorList")
+                .split(",")
+                .map((p) => p.trim())
+                .filter((p) => p),
+            minor: core.getInput("minorList")
+                .split(",")
+                .map((p) => p.trim())
+                .filter((p) => p),
+            patch: core.getInput("patchList")
+                .split(",")
+                .map((p) => p.trim())
+                .filter((p) => p),
+            patchAll: core.getBooleanInput("patchAll"),
+        };
         try {
-          core.debug(`Parsing commit ${commitSha} (${commitMessage})`);
-          return parseCommit(commitMessage, commitSha);
-        } catch (err) {
-          core.warning(
-            `[INVALID] Skipping commit ${commitSha} (${commitMessage}) as it doesn't follow conventional commit format.`
-          );
-          core.debug(err);
-          return null;
+            const latestTag = !fromTag ?
+                yield getLatestTag(gh, owner, repo, skipInvalidTags, prefix) :
+                yield getSpecificTag(gh, owner, repo, fromTag, prefix);
+            core.info(`Latest tag is ${prefix}${latestTag.name}`);
+            // OUTPUT CURRENT VARS
+            core.exportVariable("current", `${prefix}${latestTag.name}`);
+            core.setOutput("current", `${prefix}${latestTag.name}`);
+            // GET COMMITS
+            const commits = [];
+            let curPage = 0;
+            let totalCommits = 0;
+            let hasMoreCommits = false;
+            do {
+                hasMoreCommits = false;
+                curPage++;
+                const commitsRaw = yield gh.rest.repos.compareCommitsWithBasehead({
+                    owner,
+                    repo,
+                    basehead: `${latestTag.name}...${branch}`,
+                    page: curPage,
+                    per_page: 100,
+                });
+                totalCommits = lodash_default().get(commitsRaw, "data.total_commits", 0);
+                const rangeCommits = lodash_default().get(commitsRaw, "data.commits", []);
+                commits.push(...rangeCommits);
+                if ((curPage - 1) * 100 + rangeCommits.length < totalCommits) {
+                    hasMoreCommits = true;
+                }
+            } while (hasMoreCommits);
+            if (additionalCommits && additionalCommits.length > 0) {
+                commits.push(...additionalCommits);
+            }
+            if (!commits || commits.length < 1) {
+                return core.setFailed("Couldn't find any commits between HEAD and latest tag.");
+            }
+            // PARSE COMMITS
+            core.info(`Found ${commits.length} commits between HEAD and latest tag.`);
+            const getChanges = (commits) => {
+                const changes = commits.map((commit) => {
+                    var _a, _b, _c;
+                    const commitMessage = (_b = (_a = commit === null || commit === void 0 ? void 0 : commit.commit) === null || _a === void 0 ? void 0 : _a.message) !== null && _b !== void 0 ? _b : commit;
+                    const commitSha = (_c = commit === null || commit === void 0 ? void 0 : commit.sha) !== null && _c !== void 0 ? _c : "unknown";
+                    try {
+                        core.debug(`Parsing commit ${commitSha} (${commitMessage})`);
+                        return parseCommit(bumpTypes, commitMessage, commitSha);
+                    }
+                    catch (err) {
+                        core.warning(`[INVALID] Skipping commit ${commitSha} (${commitMessage}) as it doesn't follow conventional commit format.`);
+                        core.debug(err);
+                        return null;
+                    }
+                });
+                return changes;
+            };
+            const changes = !squashMergeCommitMessage ? getChanges(commits) : getChanges([squashMergeCommitMessage]);
+            const bump = changes.reduce((acc, cur) => {
+                if (cur === "major" || acc === "major")
+                    return "major";
+                if (cur === "minor" || acc === "minor")
+                    return "minor";
+                if (cur === "patch" || acc === "patch")
+                    return "patch";
+                return acc;
+            }, bumpTypes.patchAll ? "patch" : null);
+            if (!bump) {
+                switch (noVersionBumpBehavior) {
+                    case "current": {
+                        core.info("No commit resulted in a version bump since last release! Exiting with current as next version...");
+                        const next = latestTag.name;
+                        outputVersion(semver_default().clean(latestTag.name), prefix);
+                        return;
+                    }
+                    case "silent": {
+                        return core.info("No commit resulted in a version bump since last release! Exiting silently...");
+                    }
+                    case "warn": {
+                        return core.warning("No commit resulted in a version bump since last release!");
+                    }
+                    default: {
+                        return core.setFailed("No commit resulted in a version bump since last release!");
+                    }
+                }
+            }
+            core.setOutput("versionType", bump);
+            core.info(`\n>>> Will bump version ${prefix}${latestTag.name} using ${bump.toUpperCase()}\n`);
+            // BUMP VERSION
+            const next = getNextVersion(latestTag.name, bump, preReleaseStage, minimumChange);
+            core.info(`Current version is ${prefix}${latestTag.name}`);
+            core.info(`Next version is ${prefix}v${next}`);
+            outputVersion(next, prefix);
         }
-      })
-    : [parseCommit(squashMergeCommitMessage, "squashMergeCommitMessage")];
-
-  const bump = changes.reduce((acc, cur) => {
-    if (cur === "major" || acc === "major") return "major";
-    if (cur === "minor" || acc === "minor") return "minor";
-    if (cur === "patch" || acc === "patch") return "patch";
-    return acc;
-  }, null);
-
-  if (!bump) {
-    switch (noVersionBumpBehavior) {
-      case "current": {
-        core.info(
-          "No commit resulted in a version bump since last release! Exiting with current as next version..."
-        );
-        outputVersion(semver.clean(latestTag.name));
-        return;
-      }
-      case "silent": {
-        return core.info(
-          "No commit resulted in a version bump since last release! Exiting silently..."
-        );
-      }
-      case "warn": {
-        return core.warning(
-          "No commit resulted in a version bump since last release!"
-        );
-      }
-      default: {
-        return core.setFailed(
-          "No commit resulted in a version bump since last release!"
-        );
-      }
-    }
-  }
-  if (preReleaseStage != "none") bump = `pre${bump}`;
-  core.setOutput("versionType", bump);
-  core.info(
-    `\n>>> Will bump version ${prefix}${
-      latestTag.name
-    } using ${bump.toUpperCase()}\n`
-  );
-
-  // BUMP VERSION
-
-  const next =
-    preReleaseStage == "none"
-      ? semver.inc(latestTag.name, bump)
-      : semver.inc(latestTag.name, bump, preReleaseStage);
-
-  core.info(`Current version is ${prefix}${latestTag.name}`);
-  core.info(`Next version is ${prefix}v${next}`);
-
-  outputVersion(next);
+        catch (error) {
+            if (error instanceof Error)
+                core.setFailed(error.message);
+            core.setFailed("Failed to bump version");
+        }
+    });
 }
-
 main();
 
 })();
