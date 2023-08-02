@@ -85,7 +85,7 @@ async function main() {
       commits.push(...additionalCommits);
     }
 
-    if (!commits || commits.length < 1) {
+    if ((!commits || commits.length < 1) && !squashMergeCommitMessage) {
       return core.setFailed(
         "Couldn't find any commits between HEAD and latest tag."
       );
