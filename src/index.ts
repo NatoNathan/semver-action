@@ -149,10 +149,8 @@ async function main() {
       }
     }
     core.setOutput("versionType", bump);
-    core.info(
-      `\n>>> Will bump version ${prefix}${latestTag.name
-      } using ${bump.toUpperCase()}\n`
-    );
+    core.info(`Bump type is ${bump}`);
+    core.info(`Pre-release stage is ${preReleaseStage}`);
 
     // BUMP VERSION
     const next = getNextVersion(

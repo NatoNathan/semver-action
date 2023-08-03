@@ -31123,6 +31123,7 @@ const bumpValues = {
 const bumpVersion = (version, bump, preReleaseStage) => preReleaseStage === "none"
     ? semver_default().inc(version, bump)
     : semver_default().inc(version, `pre${bump}`, preReleaseStage);
+const removePreRelease = (version) => semver_default().prerelease(version) ? version.split('-')[0] : version;
 /**
  * Get the next version based on the bump type, pre-release stage and minimum change
  *
@@ -31135,13 +31136,15 @@ const bumpVersion = (version, bump, preReleaseStage) => preReleaseStage === "non
  * @param minimumChange The minimum change
  */
 const getNextVersion = (version, bump, preReleaseStage, minimumChange) => {
+    const cleanVersion = semver_default().clean(version);
     // if bump is less then minimum change, then it has higher priority
     if (bumpValues[bump] < bumpValues[minimumChange])
-        return bumpVersion(version, bump, preReleaseStage);
+        return bumpVersion(cleanVersion, bump, preReleaseStage);
     // if bump is greater then minimum change, then no version bump is required
+    // if preReleaseStage is none, return the current version with any pre-release stripped and no version bump
     return preReleaseStage === "none"
-        ? version
-        : semver_default().inc(version, "prerelease", preReleaseStage);
+        ? removePreRelease(cleanVersion)
+        : semver_default().inc(cleanVersion, "prerelease", preReleaseStage);
 };
 const parseCommit = (bumpTypes, commitMessage, commitSha = "unknown") => {
     const ast = (0,parser.parser)(commitMessage);
@@ -31377,7 +31380,8 @@ function main() {
                 }
             }
             core.setOutput("versionType", bump);
-            core.info(`\n>>> Will bump version ${prefix}${latestTag.name} using ${bump.toUpperCase()}\n`);
+            core.info(`Bump type is ${bump}`);
+            core.info(`Pre-release stage is ${preReleaseStage}`);
             // BUMP VERSION
             const next = getNextVersion(latestTag.name, bump, preReleaseStage, minimumChange);
             core.info(`Current version is ${prefix}${latestTag.name}`);

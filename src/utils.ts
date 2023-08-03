@@ -32,6 +32,8 @@ export const bumpVersion = (version: Version, bump: bumpValues, preReleaseStage:
     ? semver.inc(version, bump)
     : semver.inc(version, `pre${bump}`, preReleaseStage);
 
+const removePreRelease = (version: Version) => semver.prerelease(version) ? version.split('-')[0] : version;
+
 /**
  * Get the next version based on the bump type, pre-release stage and minimum change
  *
@@ -44,13 +46,16 @@ export const bumpVersion = (version: Version, bump: bumpValues, preReleaseStage:
  * @param minimumChange The minimum change
  */
 export const getNextVersion = (version: Version, bump: bumpValues, preReleaseStage: string, minimumChange: bumpValues | 'none') => {
+  const cleanVersion = semver.clean(version)!;
   // if bump is less then minimum change, then it has higher priority
   if (bumpValues[bump] < bumpValues[minimumChange])
-    return bumpVersion(version, bump, preReleaseStage);
+    return bumpVersion(cleanVersion, bump, preReleaseStage);
+
   // if bump is greater then minimum change, then no version bump is required
+  // if preReleaseStage is none, return the current version with any pre-release stripped and no version bump
   return preReleaseStage === "none"
-    ? version
-    : semver.inc(version, "prerelease", preReleaseStage);
+    ? removePreRelease(cleanVersion)
+    : semver.inc(cleanVersion, "prerelease", preReleaseStage);
 
 };
 
